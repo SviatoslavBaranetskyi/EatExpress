@@ -37,6 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'auth_app.apps.AuthAppConfig',
+    'delivery_app.apps.DeliveryAppConfig',
+    'payment_app.apps.PaymentAppConfig',
+    'restaurant_app.apps.RestaurantAppConfig',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -75,8 +80,12 @@ WSGI_APPLICATION = 'EatExpress.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'EatExpress',
+        'USER': 'postgres',
+        'PASSWORD': 'dbpass',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
