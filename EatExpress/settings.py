@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'delivery_app.apps.DeliveryAppConfig',
     'payment_app.apps.PaymentAppConfig',
-    'profile_app.apps.ProfileAppConfig'
+    'profile_app.apps.ProfileAppConfig',
     'restaurant_app.apps.RestaurantAppConfig',
     'rest_framework'
 ]
