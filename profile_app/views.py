@@ -38,6 +38,21 @@ class ProfileView(APIView):
         serializer = ProfileSerializer(profile)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def put(self, request, slug):
+        user = get_object_or_404(User, username=slug)
+        profile = Profile.objects.get(user=user)
+        serializer = ProfileSerializer(profile, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, slug):
+        user = get_object_or_404(User, username=slug)
+        user.delete()
+        return Response({'message': 'Profile deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
 
 class SignOutView(APIView):
     def post(self, request):
