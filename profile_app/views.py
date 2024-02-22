@@ -1,9 +1,14 @@
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.models import User
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Profile
 from .serializers import SignUpSerializer, ProfileSerializer
@@ -13,6 +18,9 @@ class SignUpView(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid():
+            username = serializer.validated_data['username']
+            if User.objects.filter(username=username).exists():
+                return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
             user = serializer.save()  # Saving a new user and user profile
             return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
         else:
@@ -26,21 +34,34 @@ class SignInView(APIView):
 
         user = authenticate(username=username, password=password)
         if user:
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)  # or HttpResponseRedirect('/')
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+
+            response = Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+            response['Access-Token'] = access_token
+            response['Refresh-Token'] = str(refresh)
+            return response  # or HttpResponseRedirect('/')
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class ProfileView(APIView):
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request, slug):
-        user = get_object_or_404(User, username=slug)
-        profile = Profile.objects.get(user=user)
+        profile = get_object_or_404(Profile, user__username=slug)
+        if request.user != profile.user:
+            return Response({'error': 'You do not have permission to view this profile'},
+                            status=status.HTTP_403_FORBIDDEN)
         serializer = ProfileSerializer(profile)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, slug):
-        user = get_object_or_404(User, username=slug)
-        profile = Profile.objects.get(user=user)
+        profile = get_object_or_404(Profile, user__username=slug)
+        if request.user != profile.user:
+            return Response({'error': 'You do not have permission to update this profile'},
+                            status=status.HTTP_403_FORBIDDEN)
         serializer = ProfileSerializer(profile, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -49,12 +70,20 @@ class ProfileView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, slug):
-        user = get_object_or_404(User, username=slug)
-        user.delete()
+        profile = get_object_or_404(Profile, user__username=slug)
+        # Перевіряємо, чи поточний користувач має доступ до цього профілю
+        if request.user != profile.user:
+            return Response({'error': 'You do not have permission to delete this profile'},
+                            status=status.HTTP_403_FORBIDDEN)
+        profile.user.delete()
         return Response({'message': 'Profile deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class SignOutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request):
-        logout(request)
-        return Response({'message': 'Successfully logged out'}, status=status.HTTP_200_OK)  # or HttpResponseRedirect
+        response = Response({'message': 'Successfully logged out'}, status=status.HTTP_200_OK)
+        response.delete_cookie('access_token')
+        response.delete_cookie('refresh_token')
+        return response
