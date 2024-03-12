@@ -1,7 +1,7 @@
-import requests
+from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -10,7 +10,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Courier, Cart, CartItem
-from .serializers import CourierSignUpSerializer, CourierSerializer, CartItemSerializer, CartSerializer
+from .serializers import CourierSignUpSerializer, CourierSerializer, CartSerializer
+from .utils import get_dish_details
 
 
 class CourierSignUpView(APIView):
@@ -21,6 +22,8 @@ class CourierSignUpView(APIView):
             if User.objects.filter(username=username).exists():
                 return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
             user = serializer.save()  # Saving a new user and courier profile
+            courier_group = Group.objects.get(name='CouriersGroup')
+            user.groups.add(courier_group)
             return Response({"message": "Courier registered successfully"}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -86,20 +89,6 @@ class CourierProfileView(APIView):
         return Response({'message': 'Profile deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
 
-class CartItemView(APIView):
-    def get(self, request):
-        items = CartItem.objects.all()
-        serializer = CartItemSerializer(items, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = CartItemSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class CartView(APIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -130,10 +119,35 @@ class CartView(APIView):
                 # Оновлення адреси у кошику
                 cart.address = new_address
 
-            # Додати до корзини нові предмети
+            # Отримати всі предмети у поточній корзині
+            existing_items = CartItem.objects.filter(cart=cart)
+            total_price = Decimal('0')
+
+            # Додати до корзини нові предмети та оновити загальну суму
             dishes = request.data.get('items', [])
             for dish in dishes:
-                CartItem.objects.create(cart=cart, dish_id=dish['dish_id'], quantity=dish['quantity'])
+                dish_id = dish['dish_id']
+                quantity = dish['quantity']
+
+                # Перевірити, чи блюдо вже є у кошику
+                existing_item = existing_items.filter(dish_id=dish_id).first()
+                if existing_item:
+                    # Якщо блюдо вже є, збільшити його кількість
+                    existing_item.quantity += quantity
+                    # Оновити вартість існуючого предмета
+                    existing_item.save()
+                else:
+                    # Якщо блюдо ще не додано, створити новий предмет
+                    dish_price = Decimal(get_dish_details(dish_id)[1])
+                    total_price += dish_price * quantity
+                    CartItem.objects.create(cart=cart, dish_id=dish_id, quantity=quantity)
+
+            # Оновити загальну суму в кошику
+            cart.total_price = Decimal('2')  # Обнулити загальну суму
+            for item in CartItem.objects.filter(cart=cart):
+                dish_price = Decimal(get_dish_details(item.dish_id)[1])
+                cart.total_price += dish_price * item.quantity
+            cart.save()
 
             # Повернути відповідь
             response_data = CartSerializer(cart).data
