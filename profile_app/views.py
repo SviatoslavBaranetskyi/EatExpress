@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -20,6 +20,8 @@ class SignUpView(APIView):
             if User.objects.filter(username=username).exists():
                 return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
             user = serializer.save()  # Saving a new user and user profile
+            customer_group = Group.objects.get(name='ProfilesGroup')
+            user.groups.add(customer_group)
             return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
