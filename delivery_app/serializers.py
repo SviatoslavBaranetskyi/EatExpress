@@ -1,8 +1,8 @@
-import requests
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
 from .models import Courier, CartItem, Cart
+from .utils import get_dish_details
 
 
 class CourierSignUpSerializer(serializers.Serializer):
@@ -68,18 +68,10 @@ class CartItemSerializer(serializers.ModelSerializer):
         fields = ['id', 'cart_id', 'dish_name', 'dish_price', 'quantity']
 
     def get_dish_name(self, obj):
-        dish_id = obj.dish_id
-        # Make a request to the FlavorHaven API to get dish details
-        response = requests.get(f"http://127.0.0.1:8000/api/v1/menu/{dish_id}/")
-        dish_data = response.json()
-        return dish_data.get('name', '')
+        return get_dish_details(obj.dish_id)[0]
 
     def get_dish_price(self, obj):
-        dish_id = obj.dish_id
-        # Make a request to the FlavorHaven API to get dish details
-        response = requests.get(f"http://127.0.0.1:8000/api/v1/menu/{dish_id}/")
-        dish_data = response.json()
-        return dish_data.get('price', 0)
+        return get_dish_details(obj.dish_id)[1]
 
 
 class CartSerializer(serializers.ModelSerializer):
@@ -88,5 +80,5 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ['id', 'user', 'items', 'address', 'status', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        fields = ['id', 'user', 'items', 'address', 'status', 'created_at', 'updated_at', 'total_price']
+        read_only_fields = ['id', 'created_at', 'updated_at', 'total_price']
