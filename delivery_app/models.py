@@ -33,6 +33,7 @@ class Cart(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
 
     def __str__(self):
         return f'CartUser - {self.user}, status - {self.status}'
