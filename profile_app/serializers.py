@@ -7,18 +7,10 @@ class SignUpSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField(max_length=255)
     password = serializers.CharField()
-    confirm_password = serializers.CharField()
     first_name = serializers.CharField(max_length=255)
     last_name = serializers.CharField(max_length=255)
     phone_number = serializers.CharField(max_length=15)
     address = serializers.CharField(max_length=255)
-
-    def validate(self, data):
-        password = data.get('password')
-        confirm_password = data.get('confirm_password')
-        if password != confirm_password:
-            raise serializers.ValidationError("Passwords do not match")
-        return data
 
     def create(self, validated_data):
         username = validated_data['username']

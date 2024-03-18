@@ -22,14 +22,11 @@ class Courier(models.Model):
 class Cart(models.Model):
     STATUS_CHOICES = [
         ('active', 'Active'),
-        ('processing', 'Processing'),
-        ('on_delivery', 'On delivery'),
-        ('delivered', 'Delivered'),
+        ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    address = models.CharField(max_length=255)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

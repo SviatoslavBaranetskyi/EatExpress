@@ -76,9 +76,8 @@ class CartItemSerializer(serializers.ModelSerializer):
 
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True, read_only=True)
-    address = serializers.CharField(max_length=255, required=False)
 
     class Meta:
         model = Cart
-        fields = ['id', 'user', 'items', 'address', 'status', 'created_at', 'updated_at', 'total_price']
+        fields = ['id', 'user', 'items', 'status', 'created_at', 'updated_at', 'total_price']
         read_only_fields = ['id', 'created_at', 'updated_at', 'total_price']

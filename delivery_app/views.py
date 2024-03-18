@@ -103,7 +103,6 @@ class CartView(APIView):
         serializer = CartSerializer(data=request.data)
         if serializer.is_valid():
             user = request.user
-            address = user.profile.address
 
             # Перевірити, чи існує активна корзина для поточного користувача
             active_cart = Cart.objects.filter(user=user, status='active').first()
@@ -113,12 +112,7 @@ class CartView(APIView):
                 cart = active_cart
             else:
                 # Якщо корзина не існує, створюємо нову корзину зі статусом "active"
-                cart = Cart.objects.create(user=user, status='active', address=address)
-
-            new_address = request.data.get('address')
-            if new_address:
-                # Оновлення адреси у кошику
-                cart.address = new_address
+                cart = Cart.objects.create(user=user, status='active')
 
             # Отримати всі предмети у поточній корзині
             existing_items = CartItem.objects.filter(cart=cart)
@@ -156,7 +150,7 @@ class CartView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class OrderDetailView(RetrieveAPIView):
+class CartDetailView(RetrieveAPIView):
     authentication_classes = (JWTAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Cart.objects.all()
