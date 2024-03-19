@@ -15,7 +15,6 @@ Content-Type: application/json<br>
 {<br>
 &nbsp;&nbsp;&nbsp;"username": "username",<br>
 &nbsp;&nbsp;&nbsp;"password": "password",<br>
-&nbsp;&nbsp;&nbsp;"confirm_password": "password",<br>
 &nbsp;&nbsp;&nbsp;"email": "username@gmail.com",<br>
 &nbsp;&nbsp;&nbsp;"first_name": "Name",<br>
 &nbsp;&nbsp;&nbsp;"last_name": "Surname",<br>
