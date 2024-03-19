@@ -68,7 +68,7 @@ Content-Type: application/json<br>
 &nbsp;&nbsp;&nbsp;],<br>
 &nbsp;&nbsp;&nbsp;"delivery_address": "new address"<br>
 &nbsp;&nbsp;&nbsp;"payment_method": "credit_card"<br>
-}
+}<br>
 GET api/v1/delivery/orders/{id}
 ## Developer
 Baranetskyi Sviatoslav
