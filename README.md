@@ -53,7 +53,6 @@ GET api/v1/restaurant/menu
 GET api/v1/delivery/orders
 - Create a new order<br>
 POST api/v1/delivery/orders
-- Retrieve detailed information for order<br>
 Content-Type: application/json<br>
 {<br>
 &nbsp;&nbsp;&nbsp;"dishes": [<br>
@@ -69,6 +68,7 @@ Content-Type: application/json<br>
 &nbsp;&nbsp;&nbsp;"delivery_address": "new address"<br>
 &nbsp;&nbsp;&nbsp;"payment_method": "credit_card"<br>
 }<br>
+- Retrieve detailed information for order<br>
 GET api/v1/delivery/orders/{id}
 ## Developer
 Baranetskyi Sviatoslav
