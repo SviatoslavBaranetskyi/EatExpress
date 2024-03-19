@@ -17,7 +17,20 @@ POST /api/v1/auth/user/login
 POST /api/v1/auth/user/logout<br>
 Authorization: Bearer your-access-token
 ## Requests that require a token (Authorization: Bearer your-access-token):
-
+- Retrieve Profile<br>
+GET /api/v1/auth/user/profile/{username}
+- Update Profile<br>
+PUT /api/v1/auth/user/profile/{username}
+- Delete Profile<br>
+DELETE /api/v1/auth/user/profile/{username}
+- Retrieve Restaurant Menu<br>
+GET api/v1/restaurant/menu
+- Retrieve a list of user orders<br>
+GET api/v1/delivery/orders
+- Create a new order<br>
+POST api/v1/delivery/orders
+- Retrieve detailed information for order<br>
+GET api/v1/delivery/orders/{id}
 ## Developer
 Baranetskyi Sviatoslav
 
