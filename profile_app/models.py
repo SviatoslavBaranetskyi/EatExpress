@@ -8,7 +8,7 @@ class Profile(models.Model):
     address = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.user.username
+        return f"{self.user.first_name} {self.user.last_name}"
 
 
 class Courier(models.Model):
