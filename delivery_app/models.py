@@ -1,29 +1,22 @@
+from django.utils import timezone
+
 from django.db import models
 from django.contrib.auth.models import User
 
 
-class Courier(models.Model):
-    STATUS_CHOICES = [
-        ('Available', 'Available'),
-        ('Busy', 'Busy'),
-        ('Unavailable', 'Unavailable'),
-    ]
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=15)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Available')
-
-    def __str__(self):
-        return f"{self.first_name} {self.last_name}"
-
-
-class Cart(models.Model):
+class Order(models.Model):
     STATUS_CHOICES = [
         ('active', 'Active'),
-        ('completed', 'Completed'),
+        ('in_progress', 'In Progress'),
+        ('on_delivery', 'On Delivery'),
+        ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
+    ]
+
+    PAYMENT_METHOD_CHOICES = [
+        ('cash', 'Cash'),
+        ('credit_card', 'Credit Card'),
+        ('online_payment', 'Online Payment'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
@@ -31,19 +24,21 @@ class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
+    delivery_address = models.CharField(max_length=255)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
 
     def __str__(self):
-        return f'CartUser - {self.user}, status - {self.status}'
+        return f'OrderUser - {self.user}, status - {self.status}'
 
     @property
-    def items(self):
-        return self.cartitem_set.all()
+    def dishes(self):
+        return self.orderitem_set.all()
 
 
-class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, null=True)
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True)
     dish_id = models.IntegerField()
     quantity = models.PositiveIntegerField(default=1)
 
     def __str__(self):
-        return f'DishID - {self.dish_id}, quantity - {self.quantity}'
+        return f'DishID - {self.id}, quantity - {self.quantity}'
