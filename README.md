@@ -10,7 +10,7 @@ The main idea is to create an API for a food delivery service, similar to UberEa
 # Description:
 ## Requests that do not require a token:
 - Register a user<br>
-POST /api/v1/auth/user/register<br>
+POST /api/v1/auth/register<br>
 Content-Type: application/json<br>
 {<br>
 &nbsp;&nbsp;&nbsp;"username": "username",<br>
@@ -22,20 +22,20 @@ Content-Type: application/json<br>
 &nbsp;&nbsp;&nbsp;"address": "Street, City, Code"<br>
 }
 - User authorization<br>
-POST /api/v1/auth/user/login<br>
+POST /api/v1/auth/login<br>
 Content-Type: application/json<br>
 {<br>
 &nbsp;&nbsp;&nbsp;"username": "username",<br>
 &nbsp;&nbsp;&nbsp;"password": "password"<br>
 }
 - User logout<br>
-POST /api/v1/auth/user/logout<br>
+POST /api/v1/auth/logout<br>
 Authorization: Bearer your-access-token
 ## Requests that require a token (Authorization: Bearer your-access-token):
 - Retrieve a user profile<br>
-GET /api/v1/auth/user/profile/{username}
+GET /api/v1/auth/profile/{username}
 - Update profile<br>
-PUT /api/v1/auth/user/profile/{username}<br>
+PUT /api/v1/auth/profile/{username}<br>
 Content-Type: application/json<br>
 {<br>
 &nbsp;&nbsp;&nbsp;"first_name": "Name",<br>
@@ -45,7 +45,7 @@ Content-Type: application/json<br>
 &nbsp;&nbsp;&nbsp;"email": "username@gmail.com"<br>
 }
 - Delete profile<br>
-DELETE /api/v1/auth/user/profile/{username}
+DELETE /api/v1/auth/profile/{username}
 - Retrieve Restaurant Menu<br>
 GET api/v1/restaurant/menu
 - Retrieve a list of user orders<br>
@@ -70,6 +70,6 @@ Content-Type: application/json<br>
 - Retrieve detailed information for order<br>
 GET api/v1/delivery/orders/{id}
 ## Developer
-Baranetskyi Sviatoslav
+Sviatoslav Baranetskyi
 
 Email: svyatoslav.baranetskiy738@gmail.com
