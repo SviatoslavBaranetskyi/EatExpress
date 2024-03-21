@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,21 +7,30 @@ from django.contrib.auth.models import User, Group
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Profile
-from .serializers import SignUpSerializer, ProfileSerializer
+from .serializers import SignUpSerializer, ProfileSerializer, CourierSerializer
+from .utils import get_profile_or_courier
 
 
 class SignUpView(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
+
         if serializer.is_valid():
             username = serializer.validated_data['username']
             if User.objects.filter(username=username).exists():
                 return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
-            user = serializer.save()  # Saving a new user and user profile
-            customer_group = Group.objects.get(name='ProfilesGroup')
-            user.groups.add(customer_group)
-            return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+
+            user = serializer.save()
+
+            if 'status' in request.data:
+                group_name = 'CouriersGroup'
+            else:
+                group_name = 'ProfilesGroup'
+
+            group = Group.objects.get(name=group_name)
+            user.groups.add(group)
+
+            return Response({"message": "You have successfully registered"}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -50,19 +58,31 @@ class ProfileView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, slug):
-        profile = get_object_or_404(Profile, user__username=slug)
+        profile, is_courier = get_profile_or_courier(slug)
+        if not profile:
+            return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer_class = CourierSerializer if is_courier else ProfileSerializer
+        serializer = serializer_class(profile)
+
         if request.user != profile.user:
             return Response({'error': 'You do not have permission to view this profile'},
                             status=status.HTTP_403_FORBIDDEN)
-        serializer = ProfileSerializer(profile)
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, slug):
-        profile = get_object_or_404(Profile, user__username=slug)
+        profile, is_courier = get_profile_or_courier(slug)
+        if not profile:
+            return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer_class = CourierSerializer if is_courier else ProfileSerializer
+        serializer = serializer_class(profile, data=request.data)
+
         if request.user != profile.user:
             return Response({'error': 'You do not have permission to update this profile'},
                             status=status.HTTP_403_FORBIDDEN)
-        serializer = ProfileSerializer(profile, data=request.data)
+
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -70,11 +90,14 @@ class ProfileView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, slug):
-        profile = get_object_or_404(Profile, user__username=slug)
-        # Перевіряємо, чи поточний користувач має доступ до цього профілю
+        profile, is_courier = get_profile_or_courier(slug)
+        if not profile:
+            return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
+
         if request.user != profile.user:
             return Response({'error': 'You do not have permission to delete this profile'},
                             status=status.HTTP_403_FORBIDDEN)
+
         profile.user.delete()
         return Response({'message': 'Profile deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
