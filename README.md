@@ -32,7 +32,10 @@ Content-Type: application/json<br>
 POST /api/v1/auth/logout<br>
 Authorization: Bearer your-access-token<br>
 - Update access token<br>
-POST api/v1/token/refresh/
+POST api/v1/token/refresh/<br>
+{<br>
+&nbsp;&nbsp;&nbsp;"refresh": "token_refresh"<br>
+}<br>
 ## Requests that require a token (Authorization: Bearer your-access-token):
 - Retrieve a user profile<br>
 GET /api/v1/auth/profile/{username}
