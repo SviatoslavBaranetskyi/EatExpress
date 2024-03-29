@@ -30,7 +30,9 @@ Content-Type: application/json<br>
 }
 - User logout<br>
 POST /api/v1/auth/logout<br>
-Authorization: Bearer your-access-token
+Authorization: Bearer your-access-token<br>
+- Update access token<br>
+POST api/v1/token/refresh/
 ## Requests that require a token (Authorization: Bearer your-access-token):
 - Retrieve a user profile<br>
 GET /api/v1/auth/profile/{username}
@@ -79,6 +81,8 @@ Content-Type: application/json<br>
 {<br>
 &nbsp;&nbsp;&nbsp;"status": "cancelled"<br>
 }<br>
+- Payment for the order<br>
+GET api/v1/payment/{order_id}<br>
 ## Developer
 Sviatoslav Baranetskyi
 
