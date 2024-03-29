@@ -64,11 +64,21 @@ Content-Type: application/json<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"quantity": 1<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
 &nbsp;&nbsp;&nbsp;],<br>
-&nbsp;&nbsp;&nbsp;"delivery_address": "new address"<br>
+&nbsp;&nbsp;&nbsp;"delivery_address": "new address",<br>
 &nbsp;&nbsp;&nbsp;"payment_method": "credit_card"<br>
 }<br>
 - Retrieve detailed information for order<br>
-GET api/v1/delivery/orders/{id}
+GET api/v1/delivery/orders/{order_id}
+- Retrieve active orders of all users for couriers<br>
+GET api/v1/delivery/orders/active<br>
+- Acceptance of the order by courier<br>
+PUT /api/orders/{order_id}/action<br>
+- Update the order status by courier<br>
+PATCH /api/orders/{order_id}/action<br>
+Content-Type: application/json<br>
+{<br>
+&nbsp;&nbsp;&nbsp;"status": "cancelled"<br>
+}<br>
 ## Developer
 Sviatoslav Baranetskyi
 
