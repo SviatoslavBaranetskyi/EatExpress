@@ -86,6 +86,12 @@ Content-Type: application/json<br>
 }<br>
 - Payment for the order<br>
 GET api/v1/payment/{order_id}<br>
+# Future plans:
+- Multi-Restaurant Support
+- Dashboard
+- Customer Reviews and Ratings
+- Real-time order tracking
+- Promotions and discounts
 ## Developer
 Sviatoslav Baranetskyi
 
