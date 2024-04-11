@@ -56,7 +56,7 @@ GET api/v1/restaurant/menu
 - Retrieve a list of user orders<br>
 GET api/v1/delivery/orders
 - Create a new order<br>
-POST api/v1/delivery/orders
+POST api/v1/delivery/orders<br>
 Content-Type: application/json<br>
 {<br>
 &nbsp;&nbsp;&nbsp;"dishes": [<br>
